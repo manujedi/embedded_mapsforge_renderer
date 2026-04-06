@@ -1,0 +1,57 @@
+.pio_version 0 // only requires PIO version 0
+
+.program qspi
+.side_set 1 opt
+.wrap_target
+    out pins, 4        side 0
+    nop                side 1
+.wrap
+
+
+
+% c-sdk {
+
+#include "hardware/gpio.h"
+#include "stdint.h"
+
+static inline void pio_qspi_init(PIO pio, uint sm, uint offset, uint n_bits, uint pin_sck, uint pin_base) {
+
+    // config
+    pio_sm_config c = qspi_program_get_default_config(offset);
+
+    //only need tx, -> fifx x2
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    // CLK
+    pio_gpio_init(pio, pin_sck);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_sck, 1, true);
+    sm_config_set_sideset_pins(&c, pin_sck);
+
+    // DAT
+    sm_config_set_out_pins(&c, pin_base, 4);
+    sm_config_set_out_shift(&c, false, true, n_bits);
+    pio_gpio_init(pio, pin_base + 0);
+    pio_gpio_init(pio, pin_base + 1);
+    pio_gpio_init(pio, pin_base + 2);
+    pio_gpio_init(pio, pin_base + 3);
+    
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_base, 4, true);
+
+    // PIO CLK
+    sm_config_set_clkdiv( &c, 4.0f);
+
+    // INIT
+    pio_sm_init( pio, sm, offset, &c );
+    //pio_sm_clear_fifos( pio , sm);
+    pio_sm_set_enabled( pio, sm, true );
+}
+
+static inline void pio_qspi_wait_idle(PIO pio, uint sm) {
+    uint32_t sm_stall_mask = 1u << (sm + PIO_FDEBUG_TXSTALL_LSB);
+    pio->fdebug = sm_stall_mask;
+    while (!(pio->fdebug & sm_stall_mask))
+        ;
+}
+
+
+%}
