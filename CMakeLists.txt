@@ -40,11 +40,31 @@ target_link_libraries(lvgl PRIVATE
         FreeRTOS-Kernel-Heap4
 )
 
+include_directories(./)
+include_directories(./Drivers)
+
+include_directories(./Drivers/Touch)
+include_directories(./Drivers/PSRAM)
+include_directories(./Drivers/DISPLAY)
+include_directories(./Drivers/SDCARD)
+include_directories(./Drivers/FatFs)
+
+
 add_executable(cyclingPC
         main.c
         ${CMAKE_CURRENT_LIST_DIR}/Drivers/PSRAM/psram.c
         Drivers/DISPLAY/display.c
-        Drivers/DISPLAY/display.h
+        Drivers/SDCARD/sd_spi.c
+        Drivers/FatFs/diskio.c
+        Drivers/FatFs/ff.c
+        Drivers/FatFs/ffsystem.c
+        Drivers/FatFs/ffunicode.c
+        Drivers/Touch/CST9217.c
+        GUI/Fonts/JetBrainsMonoRegular_12.c
+        mapsforge/mapsforge-renderer-queue.c
+        mapsforge/mapsforge-renderer.c
+        mapsforge/mapsforge_theme.c
+        mapsforge/utils.c
 )
 
 target_include_directories(cyclingPC PRIVATE
@@ -63,9 +83,10 @@ target_link_libraries(cyclingPC PRIVATE
         lvgl
 )
 target_compile_definitions(cyclingPC PRIVATE
+PICO_DISABLE_SHARED_IRQ_HANDLERS=1
 )
 
-#[[pico_enable_stdio_usb(cyclingPC 1)]]
+pico_enable_stdio_usb(cyclingPC 1)
 pico_generate_pio_header(cyclingPC ${CMAKE_CURRENT_LIST_DIR}/Drivers/DISPLAY/qspi.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/Drivers/DISPLAY/)
 
 set_property(TARGET cyclingPC APPEND_STRING PROPERTY LINK_FLAGS

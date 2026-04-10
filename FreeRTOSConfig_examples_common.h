@@ -28,6 +28,9 @@
 #ifndef FREERTOS_CONFIG_EXAMPLES_COMMON_H
 #define FREERTOS_CONFIG_EXAMPLES_COMMON_H
 
+
+#include <stdint.h>
+
 /*-----------------------------------------------------------
  * Application specific definitions.
  *
@@ -76,7 +79,7 @@
 #ifndef configSUPPORT_DYNAMIC_ALLOCATION
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
 #endif
-#define configTOTAL_HEAP_SIZE                   (256*1024)
+#define configTOTAL_HEAP_SIZE                   (400*1024)
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */
@@ -85,9 +88,16 @@
 #define configUSE_DAEMON_TASK_STARTUP_HOOK      0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS           0
+
+extern uint64_t absolut_runtime_ticks;
+extern uint64_t getRuntime( void );
+
+#define configGENERATE_RUN_TIME_STATS           1
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()    /* no-op */
+#define portGET_RUN_TIME_COUNTER_VALUE()            getRuntime()
 #define configUSE_TRACE_FACILITY                1
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
+#define configRECORD_STACK_HIGH_ADDRESS         1
 
 /* Co-routine related definitions. */
 #define configUSE_CO_ROUTINES                   0
@@ -105,6 +115,8 @@
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
 #define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
 */
+#define configKERNEL_INTERRUPT_PRIORITY  255
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY 255
 
 #if FREE_RTOS_KERNEL_SMP // set by the RP2xxx SMP port of FreeRTOS
 /* SMP port only */

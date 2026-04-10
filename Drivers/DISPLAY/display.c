@@ -3,6 +3,8 @@
 #include "portmacro.h"
 #include "qspi.pio.h"
 
+#include "Board.h"
+
 #include <FreeRTOSConfig_examples_common.h>
 #include <assert.h>
 #include <hardware/clocks.h>
@@ -196,6 +198,15 @@ void display_init(void) {
   QSPI_deselect();
 
   display_clear();
+
+    // reg=0x51, data={0xA0}
+  // set brightness to 0xA0 (~62%)
+  QSPI_select();
+  QSPI_write_spi_set_register(0x51);
+  QSPI_write_spi_byte(0xFF);
+  QSPI_deselect();
+
+
 }
 
 void dma_handler_real(void) {
@@ -273,7 +284,7 @@ void display_flush_cb(lv_display_t *_display, const lv_area_t *area,
 
       // Waiting for DMA transfer to complete
       while (dma_channel_is_busy(qspi_config.display_dma_tx))
-        ;
+        taskYIELD();
     }
     lv_display_flush_ready(qspi_config.lvgl_display);
 
@@ -304,7 +315,7 @@ void display_flush_cb(lv_display_t *_display, const lv_area_t *area,
     vTaskDelay(pdMS_TO_TICKS(time_ms + 1));
 
     while (dma_channel_is_busy(qspi_config.display_dma_tx))
-      ;
+        taskYIELD();
 
     lv_display_flush_ready(qspi_config.lvgl_display);
 

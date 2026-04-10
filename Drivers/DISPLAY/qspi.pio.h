@@ -61,7 +61,7 @@ static inline void pio_qspi_init(PIO pio, uint sm, uint offset, uint n_bits, uin
     pio_gpio_init(pio, pin_base + 3);
     pio_sm_set_consecutive_pindirs(pio, sm, pin_base, 4, true);
     // PIO CLK
-    sm_config_set_clkdiv( &c, 4.0f);
+    sm_config_set_clkdiv( &c, 2.0f);
     // INIT
     pio_sm_init( pio, sm, offset, &c );
     //pio_sm_clear_fifos( pio , sm);
