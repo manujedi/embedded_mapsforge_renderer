@@ -41,6 +41,7 @@ target_link_libraries(lvgl PRIVATE
 )
 
 include_directories(./)
+include_directories(./GUI)
 include_directories(./Drivers)
 
 include_directories(./Drivers/Touch)
@@ -60,11 +61,14 @@ add_executable(cyclingPC
         Drivers/FatFs/ffsystem.c
         Drivers/FatFs/ffunicode.c
         Drivers/Touch/CST9217.c
+        GUI/map_screen.c
         GUI/Fonts/JetBrainsMonoRegular_12.c
         mapsforge/mapsforge-renderer-queue.c
         mapsforge/mapsforge-renderer.c
         mapsforge/mapsforge_theme.c
         mapsforge/utils.c
+        Drivers/GPS/LC76G.c
+        Drivers/GPS/LC76G.h
 )
 
 target_include_directories(cyclingPC PRIVATE
@@ -83,10 +87,10 @@ target_link_libraries(cyclingPC PRIVATE
         lvgl
 )
 target_compile_definitions(cyclingPC PRIVATE
-PICO_DISABLE_SHARED_IRQ_HANDLERS=1
 )
 
 pico_enable_stdio_usb(cyclingPC 1)
+pico_enable_stdio_uart(cyclingPC 0)
 pico_generate_pio_header(cyclingPC ${CMAKE_CURRENT_LIST_DIR}/Drivers/DISPLAY/qspi.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/Drivers/DISPLAY/)
 
 set_property(TARGET cyclingPC APPEND_STRING PROPERTY LINK_FLAGS

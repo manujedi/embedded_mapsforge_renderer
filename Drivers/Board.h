@@ -18,4 +18,8 @@
 #define TOUCH_RST_PIN 23
 #define TOUCH_INT_PIN 22
 
+#define GPS_RST_PIN 24
+#define GPS_RXDI_PIN 25
+#define GPS_TXDI_PIN 26
+
 #endif

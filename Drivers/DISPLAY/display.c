@@ -197,7 +197,7 @@ void display_init(void) {
   QSPI_write_spi_byte(0x05);
   QSPI_deselect();
 
-  display_clear();
+  // display_clear();
 
     // reg=0x51, data={0xA0}
   // set brightness to 0xA0 (~62%)

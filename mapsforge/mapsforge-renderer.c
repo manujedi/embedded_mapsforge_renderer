@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -420,7 +421,7 @@ int renderer_read_ways_to_mem(mapsforge_header *header, uint8_t zoom, uint32_t t
             uint64_t tag_id;
             ptr += parseVBEU(&tag_id, ptr);
             if (header->way_tag_theme_lookup[tag_id]) {
-                if (header->way_tag_theme_lookup[tag_id]->line_width[zoom]) {
+                //if (header->way_tag_theme_lookup[tag_id]->line_width[zoom]) {
                     // initial tag that is rendered
                     if (layer_way_list_save_current_way_to_render == false) {
                         layer_way_list_save_current_way_to_render = true;
@@ -432,7 +433,7 @@ int renderer_read_ways_to_mem(mapsforge_header *header, uint8_t zoom, uint32_t t
                         tag_id_highest_z = tag_id;
                         highest_theme_z_layer = header->way_tag_theme_lookup[tag_id]->z_layer;
                     }
-                }
+               // }
             }
         }
 
@@ -589,8 +590,8 @@ int renderer_read_ways_to_mem(mapsforge_header *header, uint8_t zoom, uint32_t t
         way_offset_in_file = way_offset_in_file + way_signature_data_size_size + way_data_size;
     }
 
-    /*printf("Used way mem: %ld (%ld%%)\n", (layer_way_list_mem_ptr - mem->ways_buffer),
-           (layer_way_list_mem_ptr - mem->ways_buffer) * 100 / WAYS_BUFFER_SIZE);*/
+    printf("Used way mem: %ld (%ld%%)\n", (layer_way_list_mem_ptr - ((uint8_t *) WAYS_BUFFER)),
+           (layer_way_list_mem_ptr - ((uint8_t *) WAYS_BUFFER)) * 100 / WAYS_BUFFER_SIZE);
     printf("Used way names mem: %ld (%ld%%)\n", (layer_way_name_list_mem_ptr - ((uint8_t *) WAY_NAMES_BUFFER)),
            (layer_way_name_list_mem_ptr - ((uint8_t *) WAY_NAMES_BUFFER)) * 100 / WAYS_BUFFER_SIZE);
 
@@ -652,11 +653,8 @@ int renderer_render_tile_from_mem(mapsforge_header *header, uint8_t zoom, uint32
 
     xSemaphoreGive(lvgl_lock);
 
-
     // streets and polygons
     for (int layer = 0; layer < 256; ++layer) {
-
-
 
         way_list_entry_way *node = way_starts[layer];
         while (node != NULL) {
@@ -793,7 +791,7 @@ int renderer_render_tile_from_mem(mapsforge_header *header, uint8_t zoom, uint32
             }
 
             lv_canvas_finish_layer(canvas, &lv_layer);
-            lv_canvas_init_layer(canvas, &lv_layer);
+            // lv_canvas_init_layer(canvas, &lv_layer);
 
             xSemaphoreGive(lvgl_lock);
 
@@ -803,7 +801,8 @@ int renderer_render_tile_from_mem(mapsforge_header *header, uint8_t zoom, uint32
     }
 
     // labels
-    /*way_list_entry_way_name *node = *((way_list_entry_way_name **) ((uint8_t*) WAY_NAMES_BUFFER));
+    /*
+    way_list_entry_way_name *node = *((way_list_entry_way_name **) ((uint8_t*) WAY_NAMES_BUFFER));
     while (node != NULL) {
         int32_t x0 = (int32_t) (lonMdToX_px(node->mlon, zoom) - tile_x_px);
         int32_t y0 = (int32_t) (latMdToY_px(node->mlat, zoom) - tile_y_px);
@@ -812,7 +811,7 @@ int renderer_render_tile_from_mem(mapsforge_header *header, uint8_t zoom, uint32
         memcpy(txt, node->name, len);
         txt[len] = 0;
 
-        mutex_enter_blocking(&lvgl_lock);
+        xSemaphoreTake(lvgl_lock, portMAX_DELAY);
 
         lv_draw_label_dsc_t label_dsc;
         lv_draw_label_dsc_init(&label_dsc);
@@ -831,16 +830,18 @@ int renderer_render_tile_from_mem(mapsforge_header *header, uint8_t zoom, uint32
 
         lv_canvas_finish_layer(canvas, &lv_layer);
 
-        mutex_exit(&lvgl_lock);
+        xSemaphoreGive(lvgl_lock);
 
 
         node = node->next;
-    }*/
+    }
+    */
 
 
-    /*
+    
     sprintf(txt, "%i/%i/%i", zoom, tile_x, tile_y);
 
+    xSemaphoreTake(lvgl_lock, portMAX_DELAY);
     lv_draw_label_dsc_t label_dsc;
     lv_draw_label_dsc_init(&label_dsc);
     label_dsc.color.blue = 0;
@@ -851,7 +852,8 @@ int renderer_render_tile_from_mem(mapsforge_header *header, uint8_t zoom, uint32
     lv_area_t coords = {5, 5, 256, 256};
     lv_draw_label(&lv_layer, &label_dsc, &coords);
     lv_canvas_finish_layer(canvas, &lv_layer);
-    */
+    xSemaphoreGive(lvgl_lock);
+    
 
     xSemaphoreTake(lvgl_lock, portMAX_DELAY);
 

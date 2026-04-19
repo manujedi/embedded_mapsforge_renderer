@@ -28,8 +28,16 @@
 ******************************************************************************/
 #include "CST9217.h"
 #include "Board.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "FreeRTOS.h"
+#include "portmacro.h"
+#include "pico/async_context_freertos.h"
+#include "semphr.h"
 
 CST9217_Struct CST9217;
+extern SemaphoreHandle_t i2c_lock;
 
 /******************************************************************************
 function :  Send one byte of data to the specified register of CST9217
@@ -37,7 +45,10 @@ parameter:
 ******************************************************************************/
 static void CST9217_I2C_Write_Byte(uint8_t reg, uint8_t value) {
   uint8_t data[2] = {reg, value};
+
+  xSemaphoreTake(i2c_lock, portMAX_DELAY);
   i2c_write_blocking(BOARD_I2C_PORT, CST9217_I2C_ADDR, data, 2, false);
+  xSemaphoreGive(i2c_lock);
 }
 
 /******************************************************************************
@@ -52,7 +63,10 @@ static void CST9217_I2C_Write_nByte(uint16_t reg, uint8_t *pData,
   for (uint8_t i = 0; i < Len; i++) {
     data[2 + i] = pData[i];
   }
+
+  xSemaphoreTake(i2c_lock, portMAX_DELAY);
   i2c_write_blocking(BOARD_I2C_PORT, CST9217_I2C_ADDR, data, Len, false);
+  xSemaphoreGive(i2c_lock);
 }
 
 /******************************************************************************
@@ -61,8 +75,11 @@ parameter:
 ******************************************************************************/
 static uint8_t CST9217_I2C_Read_Byte(uint8_t reg) {
   uint8_t buf;
+
+  xSemaphoreTake(i2c_lock, portMAX_DELAY);
   i2c_write_blocking(BOARD_I2C_PORT, CST9217_I2C_ADDR, &reg, 1, true);
   i2c_read_blocking(BOARD_I2C_PORT, CST9217_I2C_ADDR, &buf, 1, false);
+  xSemaphoreGive(i2c_lock);
   return buf;
 }
 
@@ -74,8 +91,11 @@ static void CST9217_I2C_Read_nByte(uint16_t reg, uint8_t *pData, uint32_t Len) {
   uint8_t data[2];
   data[0] = reg >> 8;
   data[1] = reg & 0xFF;
+
+  xSemaphoreTake(i2c_lock, portMAX_DELAY);
   i2c_write_blocking(BOARD_I2C_PORT, CST9217_I2C_ADDR, data, 2, true);
   i2c_read_blocking(BOARD_I2C_PORT, CST9217_I2C_ADDR, pData, Len, false);
+  xSemaphoreGive(i2c_lock);
 }
 
 /******************************************************************************
@@ -83,6 +103,8 @@ function :  Reset the CST9217
 parameter:
 ******************************************************************************/
 void CST9217_Reset(void) {
+  gpio_init(TOUCH_RST_PIN);
+  gpio_set_dir(TOUCH_RST_PIN, GPIO_OUT);
   gpio_put(TOUCH_RST_PIN, 0);
   sleep_ms(10);
   gpio_put(TOUCH_RST_PIN, 1);
@@ -99,9 +121,11 @@ void CST9217_Init(void) {
 
   sleep_ms(30);
 
+  xSemaphoreTake(i2c_lock, portMAX_DELAY);
   i2c_init(BOARD_I2C_PORT, 400 * 1000);
   gpio_set_function(BOARD_SDA_PIN, GPIO_FUNC_I2C);
   gpio_set_function(BOARD_SCL_PIN, GPIO_FUNC_I2C);
+  xSemaphoreGive(i2c_lock);
   gpio_pull_up(BOARD_SDA_PIN);
   gpio_pull_up(BOARD_SCL_PIN);
 
@@ -146,6 +170,10 @@ bool CST9217_Read_Data(void) {
     return false;
   }
 
+  for (uint8_t i = 0; i < CST9217_MAX_TOUCH_POINTS; i++) {
+    CST9217.data[i].valid = false;
+  }
+
   CST9217.points = data[5] & 0x7F;
   CST9217.points = (CST9217.points > CST9217_MAX_TOUCH_POINTS)
                        ? CST9217_MAX_TOUCH_POINTS
@@ -155,7 +183,6 @@ bool CST9217_Read_Data(void) {
     uint8_t *p = &data[i * 5 + (i ? 2 : 0)];
     uint8_t status = p[0] & 0x0F;
 
-    CST9217.data[i].valid = false;
     if (status == 0x06) {
       CST9217.data[i].x = ((p[1] << 4) | (p[3] >> 4));
       CST9217.data[i].y = ((p[2] << 4) | (p[3] & 0x0F));
@@ -169,5 +196,6 @@ bool CST9217_Read_Data(void) {
       // CST9217.data[i].y);
     }
   }
+  asm("nop");
   return true;
 }

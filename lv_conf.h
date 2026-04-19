@@ -90,7 +90,7 @@
  *====================*/
 
 /** Default display refresh, input device read and animation step period. */
-#define LV_DEF_REFR_PERIOD  10     /**< [ms] */
+#define LV_DEF_REFR_PERIOD  33     /**< [ms] */
 
 /** Default Dots Per Inch. Used to initialize default sizes such as widgets sized, style paddings.
  * (Not so important, you can adjust it to modify default sizes and spaces.) */
@@ -471,7 +471,7 @@
      *  - LV_LOG_LEVEL_ERROR    Log only critical issues, when system may fail.
      *  - LV_LOG_LEVEL_USER     Log only custom log messages added by the user.
      *  - LV_LOG_LEVEL_NONE     Do not log anything. */
-    #define LV_LOG_LEVEL LV_LOG_LEVEL_TRACE
+    #define LV_LOG_LEVEL LV_LOG_LEVEL_INFO
 
     /** - 1: Print log with 'printf';
      *  - 0: User needs to register a callback with `lv_log_register_print_cb()`. */
@@ -595,7 +595,7 @@
 
 /* Enable the multi-touch gesture recognition feature */
 /* Gesture recognition requires the use of floats */
-#define LV_USE_GESTURE_RECOGNITION 0
+#define LV_USE_GESTURE_RECOGNITION 1
 
 /*=====================
  *  COMPILER SETTINGS
