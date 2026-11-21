@@ -15,7 +15,7 @@ But I succeeded in creating a mapsforge renderer. With the limited amount of ram
 - POI parsed (could be searched)
 - Lvgl as graphics library. Highly portable
 
-No AI was used in this project but feel free to continue working on this with AI. Maybe I will continue in winter with the project.
+No AI was used in this project but feel free to continue working on this with AI. Maybe I will continue in winter with the project and just vibe code the rest of it.
 
 Demo:
 
