@@ -12,4 +12,6 @@ lv_obj_t* get_map_screen(void);
 
 int render_tile(void);
 
+int helper(void);
+
 #endif

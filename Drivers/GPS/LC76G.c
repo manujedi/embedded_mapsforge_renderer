@@ -12,51 +12,34 @@
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
 
+#include "hardware/uart.h"
+
 extern SemaphoreHandle_t i2c_lock;
 
 GPS_information_t gps_information;
 
 
-#define DEVICE_ADDRESS     0x50
-#define DEVICE_ADDRESS_R   0x54
-
 void LC76G_init(void) {
-    xSemaphoreTake(i2c_lock, portMAX_DELAY);
-    i2c_init(BOARD_I2C_PORT, 100 * 1000);
-    gpio_set_function(BOARD_SDA_PIN, GPIO_FUNC_I2C);
-    gpio_set_function(BOARD_SCL_PIN, GPIO_FUNC_I2C);
-    xSemaphoreGive(i2c_lock);
-    gpio_pull_up(BOARD_SDA_PIN);
-    gpio_pull_up(BOARD_SCL_PIN);
 
     gpio_init(GPS_RST_PIN);
     gpio_set_dir(GPS_RST_PIN, GPIO_OUT);
     gpio_put(GPS_RST_PIN, 0);
-    sleep_ms(10);
-    gpio_put(GPS_RST_PIN, 1);
-    sleep_ms(50);
+    sleep_ms(100);
+    // internally pulled up in GPS module
+    gpio_init(GPS_RST_PIN);
+    sleep_ms(1000);
 
     // mark data is invalid
     memset(&gps_information, 0, sizeof(GPS_information_t));
     gps_information.timestamp_tick = UINT32_MAX;
 
+    uart_init(uart1, 9600);
+
+    // Correct mapping
+    gpio_set_function(GPS_TX_PIN, UART_FUNCSEL_NUM(uart1, GPS_TX_PIN));
+    gpio_set_function(GPS_RX_PIN, UART_FUNCSEL_NUM(uart1, GPS_RX_PIN));
 }
 
-// -------------------- I2C WRITE --------------------
-bool i2c_write(uint8_t addr, const uint8_t *data, size_t len) {
-    xSemaphoreTake(i2c_lock, portMAX_DELAY);
-    int ret = i2c_write_blocking(BOARD_I2C_PORT, addr, data, len, false);
-    xSemaphoreGive(i2c_lock);
-    return (ret >= 0);
-}
-
-// -------------------- I2C READ --------------------
-bool i2c_read(uint8_t addr, uint8_t *data, size_t len) {
-    xSemaphoreTake(i2c_lock, portMAX_DELAY);
-    int ret = i2c_read_blocking(BOARD_I2C_PORT, addr, data, len, false);
-    xSemaphoreGive(i2c_lock);
-    return (ret >= 0);
-}
 
 uint32_t find_next_comma(uint8_t *readData, uint32_t maxLength) {
     uint32_t i = 0;
@@ -93,7 +76,7 @@ int32_t parseLatitude(uint8_t *readData, uint32_t maxLength) {
         minutes += (float) (readData[i] - '0') * factor;
         factor *= 0.1f;
     }
-    millidegrees += (minutes/60) * 1000000;
+    millidegrees += (minutes / 60) * 1000000;
     return (int32_t) millidegrees;
 }
 
@@ -122,7 +105,7 @@ int32_t parseLongitude(uint8_t *readData, uint32_t maxLength) {
         minutes += (float) (readData[i] - '0') * factor;
         factor *= 0.1f;
     }
-    millidegrees += (minutes/60) * 1000000;
+    millidegrees += (minutes / 60) * 1000000;
     return (int32_t) millidegrees;
 }
 
@@ -195,86 +178,18 @@ void LC76G_parse_GNGGA(uint8_t *readData) {
     readData += find_next_comma(readData, lineLenght) + 1;
 
     len = find_next_comma(readData, lineLenght);
-    float altitude = strtof((char*)readData, NULL);
+    float altitude = strtof((char *) readData, NULL);
 
     gps_information.altitude = (int32_t) altitude;
-
-
-
-
-
-
 }
 
 
 void LC76G_read_NMEA(void) {
-    // init write
-    uint8_t data[] = {0x08, 0x00, 0x51, 0xAA, 0x04, 0x00, 0x00, 0x00};
-    uint8_t readData[4] = {0};
 
-    if (!i2c_write(DEVICE_ADDRESS, data, sizeof(data))) {
-        printf("Write failed\n");
-        return;
+    uint8_t buff[1];
+    while (1) {
+        uart_read_blocking(uart1, buff, 1);
+        printf("%c\n", *buff);
     }
 
-    vTaskDelay(pdMS_TO_TICKS(100));
-
-    if (!i2c_read(DEVICE_ADDRESS_R, readData, sizeof(readData))) {
-        printf("Read failed\n");
-        return;
-    }
-
-    uint32_t dataLength =
-            (readData[0]) |
-            (readData[1] << 8) |
-            (readData[2] << 16) |
-            (readData[3] << 24);
-
-    if (dataLength == 0) return;
-
-    uint8_t data2[] = {0x00, 0x20, 0x51, 0xAA};
-    uint8_t totalData[sizeof(data2) + sizeof(readData)];
-
-    memcpy(totalData, data2, sizeof(data2));
-    memcpy(totalData + sizeof(data2), readData, sizeof(readData));
-
-    vTaskDelay(pdMS_TO_TICKS(100));
-
-    if (!i2c_write(DEVICE_ADDRESS, totalData, sizeof(totalData))) {
-        printf("Write2 failed\n");
-        return;
-    }
-
-    uint8_t *dynamicReadData = (uint8_t *) malloc(dataLength);
-    if (!dynamicReadData) {
-        printf("Malloc failed\n");
-        return;
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(100));
-
-    if (!i2c_read(DEVICE_ADDRESS_R, dynamicReadData, dataLength)) {
-        printf("Dynamic read failed\n");
-        free(dynamicReadData);
-        return;
-    }
-
-    // OUTPUT NMEA
-    /*printf("%.*s", dataLength, (char *) dynamicReadData);
-    printf("\n");*/
-
-    // parse NMEA
-    for (uint32_t i = 0; i < dataLength; i++) {
-        if (memcmp(dynamicReadData + i, "$GNGGA", 6) == 0) {
-            LC76G_parse_GNGGA(dynamicReadData);
-        }
-
-        // next line
-        while (dynamicReadData[i] != '\n' && i < dataLength) {
-            i++;
-        }
-    }
-
-
-    free(dynamicReadData);
 }

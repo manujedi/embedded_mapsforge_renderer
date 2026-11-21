@@ -7,7 +7,7 @@ endif ()
 
 set(PICO_PLATFORM rp2350)
 set(PICO_BOARD pico2)
-set(PICO_SDK_PATH /home/manu/Dokumente/Code/pico-sdk/)
+set(PICO_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/pico-sdk/)
 set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/FreeRTOS-Kernel)
 
 include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
@@ -92,6 +92,8 @@ target_compile_definitions(cyclingPC PRIVATE
 pico_enable_stdio_usb(cyclingPC 1)
 pico_enable_stdio_uart(cyclingPC 0)
 pico_generate_pio_header(cyclingPC ${CMAKE_CURRENT_LIST_DIR}/Drivers/DISPLAY/qspi.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/Drivers/DISPLAY/)
+#[[pico_generate_pio_header(cyclingPC ${CMAKE_CURRENT_LIST_DIR}/Drivers/GPS/uart_rx.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/Drivers/GPS/)
+pico_generate_pio_header(cyclingPC ${CMAKE_CURRENT_LIST_DIR}/Drivers/GPS/uart_tx.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/Drivers/GPS/)]]
 
 set_property(TARGET cyclingPC APPEND_STRING PROPERTY LINK_FLAGS
         "-Wl,--print-memory-usage"

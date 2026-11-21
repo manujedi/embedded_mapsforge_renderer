@@ -26,9 +26,13 @@ static lv_obj_t *minus_label;
 
 static uint32_t longitude = 15458252;
 static uint32_t latitude = 47059026;
+static uint8_t zoom;
+// tile x any y at the top left from the current rendered area
 static uint32_t tile_x;
 static uint32_t tile_y;
-static uint8_t zoom;
+// center of the screen in offset from top left corner
+static uint16_t x_offset_px;
+static uint16_t y_offset_px;
 
 renderer_queue_config *queue_config;
 
@@ -368,6 +372,10 @@ static void scroll_event_cb(lv_event_t *e) {
     // if we scrolled more than 256px
     lv_obj_scroll_by(map_obj, 0, +256, LV_ANIM_OFF);
   }
+
+  x_offset_px = l + (DISPLAY_WIDTH/2);
+  y_offset_px = t + (DISPLAY_HEIGHT/2);
+
 }
 
 int render_tile(void) { return render_queue_render_item(queue_config); }
@@ -384,4 +392,11 @@ void render_done_cb(void *buff) {
     }
   }
   xSemaphoreGive(lvgl_lock);
+}
+
+int helper(void) {
+
+
+
+  return 0;
 }

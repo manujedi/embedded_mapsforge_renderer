@@ -40,7 +40,7 @@ typedef struct qspi_config {
 } qspi_config_t;
 
 qspi_config_t qspi_config = {
-    .qspi_pio = pio0,
+    .qspi_pio = DISPLAY_QSPI_PIO,
     .qspi_sm = 0,
     .qspi_sm_offset = 0,
     .n_bits = 0,
@@ -173,7 +173,7 @@ void display_init(void) {
   // set brightness to 0xA0 (~62%)
   QSPI_select();
   QSPI_write_spi_set_register(0x51);
-  QSPI_write_spi_byte(0xA0);
+  QSPI_write_spi_byte(0x10);
   QSPI_deselect();
 
   // reg=0x20, data_bytes=0

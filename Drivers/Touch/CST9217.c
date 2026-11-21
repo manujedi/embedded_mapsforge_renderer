@@ -122,7 +122,7 @@ void CST9217_Init(void) {
   sleep_ms(30);
 
   xSemaphoreTake(i2c_lock, portMAX_DELAY);
-  i2c_init(BOARD_I2C_PORT, 400 * 1000);
+  i2c_init(BOARD_I2C_PORT, 100 * 1000);
   gpio_set_function(BOARD_SDA_PIN, GPIO_FUNC_I2C);
   gpio_set_function(BOARD_SCL_PIN, GPIO_FUNC_I2C);
   xSemaphoreGive(i2c_lock);

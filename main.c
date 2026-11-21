@@ -159,6 +159,12 @@ void lv_tick(__unused void *params) {
 
 void lv_timer(__unused void *params) {
   uint32_t timeout = 0;
+
+  // mapsforge display
+  xSemaphoreTake(lvgl_lock, portMAX_DELAY);
+  map_screen_init(map_header);
+  xSemaphoreGive(lvgl_lock);
+
   while (true) {
     vTaskDelay(pdMS_TO_TICKS(MIN(LV_DEF_REFR_PERIOD, timeout)));
     xSemaphoreTake(lvgl_lock, portMAX_DELAY);
@@ -189,13 +195,16 @@ void main_task(__unused void *params) {
   // lvgl
   lv_init();
   display = lv_display_create(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-  uint8_t *buf = (uint8_t *)LVGL_FRAME_BUFFER;
-  lv_display_set_buffers(display, buf, NULL, 466 * 466 * 2,
-                         LV_DISPLAY_RENDER_MODE_DIRECT);
 
-  // uint8_t *buf = (uint8_t *)pvPortCalloc(1,466*466*2);
-  // lv_display_set_buffers(display, buf, NULL, 466 * 466 * 2,
-  //                        LV_DISPLAY_RENDER_MODE_DIRECT);
+  //psram
+  /*uint8_t *buf = (uint8_t *)LVGL_FRAME_BUFFER;
+  lv_display_set_buffers(display, buf, NULL, 466 * 466 * 2,
+                         LV_DISPLAY_RENDER_MODE_DIRECT);*/
+
+  // internal ram
+   static uint8_t buf[466*466*2];
+   lv_display_set_buffers(display, buf, NULL, 466 * 466 * 2,
+                          LV_DISPLAY_RENDER_MODE_DIRECT);
 
   display_prepeare_lvgl(display);
 
@@ -226,21 +235,30 @@ void main_task(__unused void *params) {
   renderer_init_map(map_header,
                     "/austria-orig-settings-nodebug-v27-03simple.map");
 
-  // mapsforge display
-  map_screen_init(map_header);
+  if (pdPASS != xTaskCreate(lv_tick, "lv_tick", configMINIMAL_STACK_SIZE, NULL, 15, NULL)) {
+    asm("bkpt");
+  }
 
-  xTaskCreate(lv_tick, "lv_tick", configMINIMAL_STACK_SIZE, NULL, 15, NULL);
+  if (pdPASS != xTaskCreate(lv_timer, "lv_timer",  2*1024, NULL, 8, NULL)) {
+    asm("bkpt");
+  }
 
-  xTaskCreate(lv_timer, "lv_timer", 32 * 1024, NULL, 8, NULL);
+  if (pdPASS != xTaskCreate(render_tile_task, "mapsforge_render", 5*1024, NULL, 1, NULL)) {
+    asm("bkpt");
+  }
 
-  xTaskCreate(render_tile_task, "mapsforge_render", 16 * 1024, NULL, 1, NULL);
+  if (pdPASS != xTaskCreate(input_gesture_detection_task, "input_gesture",
+              configMINIMAL_STACK_SIZE, NULL, 12, NULL)) {
+    asm("bkpt");
+  }
 
-  /*xTaskCreate(input_gesture_detection_task, "input_gesture",
-              configMINIMAL_STACK_SIZE, NULL, 12, NULL);*/
-
-  xTaskCreate(gps_read_task, "gps_read_task", 1 * 1024, NULL, 10, NULL);
+  // xTaskCreate(gps_read_task, "gps_read_task", 1 * 1024, NULL, 10, NULL);
 
   // remove us
+  while (1) {
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+
   vTaskDelete(NULL);
 }
 
@@ -256,7 +274,7 @@ int main(void) {
 
   printf("Starting %s on both cores:\n", rtos_name);
 
-  xTaskCreate(main_task, "MainThread", 16 * 1024, NULL, 15, &maintask);
+  xTaskCreate(main_task, "MainThread", configMINIMAL_STACK_SIZE, NULL, 15, &maintask);
 
   // we must bind the main task to one core (well at least while the init is
   // called)

@@ -94,14 +94,14 @@ int d2md(float degrees) {
 
 // Returns longitude in pixels at a certain zoom level
 uint32_t lonMdToX_px(int32_t lon, uint8_t zoom) {
-    uint64_t offset = 256 << (zoom - 1);
-    uint64_t nominator = offset * 180000000 + offset * lon;
-    return nominator / 180000000;
+    uint64_t offset = 256ULL << (zoom - 1);
+    uint64_t nominator = offset * 180000000ULL + offset * lon;
+    return nominator / 180000000ULL;
 }
 
 // Returns latitude in pixels at a certain zoom level
 uint32_t latToY_px(float lat, uint8_t zoom) {
-    uint32_t offset = 256 << (zoom - 1);
+    uint32_t offset = 256ULL << (zoom - 1);
     return (uint32_t) roundf(
         (float) offset - (float) offset / (float) M_PI *
         logf((1 + sinf(lat * (float) M_PI / 180)) / (1 - sinf(lat * (float) M_PI / 180))) / 2);
@@ -111,6 +111,21 @@ uint32_t latMdToY_px(int32_t lat, uint8_t zoom) {
     return latToY_px(md2d(lat), zoom);
 }
 
+// reverse from above
+int32_t x_pxToLonMd(uint32_t x, uint8_t zoom) {
+    uint64_t offset = 256ULL << (zoom - 1);
+    uint64_t lon = ((uint64_t)x * 180000000ULL) / offset;
+    return (int32_t)(lon - 180000000ULL);
+}
+
+float y_pxToLat(uint32_t y, uint8_t zoom) {
+    uint32_t offset = 256ULL << (zoom - 1);
+
+    float n = ((float)offset - (float)y) * (float)M_PI / (float)offset;
+    float lat_rad = 2.0f * atanf(expf(n)) - (float)M_PI / 2.0f;
+
+    return lat_rad * 180.0f / (float)M_PI;
+}
 
 uint32_t longMd2tilex(int32_t lon, int z) {
     uint64_t numerator = ((uint64_t) lon + 180000000) * (1 << z);
