@@ -1,0 +1,13 @@
+#ifndef MAIN_INCLUDE_H
+#define MAIN_INCLUDE_H
+
+#define DISPLAY_WIDTH  466
+#define DISPLAY_HEIGHT 466
+
+//#define PSRAM_LOCATION _u(0x15000000)
+#define PSRAM_LOCATION 0x11000000U
+#define PSRAM_SIZE      0x800000U
+
+#define TILE_DIM 5
+
+#endif
