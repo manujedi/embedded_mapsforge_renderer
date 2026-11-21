@@ -1,3 +1,10 @@
+/**
+* Copyright (c) Manuel Jedinger
+ *
+ * SPDX-License-Identifier: GPL-2.0
+ */
+
+
 #include "map_screen.h"
 #include "PSRAM/mem.h"
 #include "lvgl.h"

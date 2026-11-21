@@ -1,3 +1,10 @@
+/**
+* Copyright (c) Manuel Jedinger
+ *
+ * SPDX-License-Identifier: GPL-2.0
+ */
+
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include <math.h>

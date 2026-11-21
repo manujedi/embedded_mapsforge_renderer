@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2022 Raspberry Pi (Trading) Ltd.
+* Copyright (c) Manuel Jedinger
  *
- * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-License-Identifier: GPL-2.0
  */
 
 #include <FreeRTOSConfig_examples_common.h>
@@ -255,10 +255,6 @@ void main_task(__unused void *params) {
   // xTaskCreate(gps_read_task, "gps_read_task", 1 * 1024, NULL, 10, NULL);
 
   // remove us
-  while (1) {
-    vTaskDelay(pdMS_TO_TICKS(500));
-  }
-
   vTaskDelete(NULL);
 }
 
