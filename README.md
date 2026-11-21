@@ -14,12 +14,13 @@ But I succeeded in creating a mapsforge renderer. With the limited amount of ram
 - any theme possible
 - POI parsed (could be searched)
 - Lvgl as graphics library. Highly portable
+- 60fps if internal ram is used for display framebuffer
 
 No AI was used in this project but feel free to continue working on this with AI. Maybe I will continue in winter with the project and just vibe code the rest of it.
 
-Demo:
+### Demo:
+high res video in docs/
 
-video [video.mp4](docs/video.mp4)
-
+![video.gif](docs/video.gif) 
 ![photo_1.jpg](docs/photo_1.jpg)
 ![photo_2.jpg](docs/photo_2.jpg)
