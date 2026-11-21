@@ -19,6 +19,7 @@ No AI was used in this project but feel free to continue working on this with AI
 
 Demo:
 
+video [video.mp4](docs/video.mp4)
+
 ![photo_1.jpg](docs/photo_1.jpg)
 ![photo_2.jpg](docs/photo_2.jpg)
-![video.gif](docs/video.gif)
