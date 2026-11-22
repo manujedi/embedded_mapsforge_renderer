@@ -2,13 +2,13 @@
 
 Last year I tried to render mapsforge maps on embedded devices like the [Waveshare display with a raspberry pico](https://docs.waveshare.com/RP2350-Touch-AMOLED-1.75) with the goal to create a bicycle computer because i wasn't satisfied with the BSC300. Sadly, I lost interest and I don't have the time anymore to finish the project. 
 
-But I succeeded in creating a mapsforge renderer. With the limited amount of ram (8mb psram and ~500kb internal) it works better than expected. Themes + the zoom where details are shown can be set inside [mapsforge_theme.c](mapsforge/mapsforge_theme.c). The video shows a style that is as close as possible to openstreetmaps. If you only want to render streets, it is blazingly fast.
+But I succeeded in creating a mapsforge renderer. With the limited amount of ram (8mb psram and ~500kb internal) it works better than expected. Themes + the zoom where details are shown can be set inside [mapsforge_theme.c](mapsforge/mapsforge_theme.c). The video shows a style that is as close as possible to openstreetmaps. If you only want to render streets, it is blazingly fast (no polygons to fill like houses, green areas,...).
 
 # Features:
 - full mapsforge format support (~500mb for austria)
 - any zoom level
 - any detail selectable (e.g. no highways if you want a cycle map)
-- less than 20kb ram needed + 256*256*2 Bytes per tile in ram
+- less than 20kb ram needed + 256 * 256 * 2 Bytes per tile in ram
 - auto loading tiles when scrolling outside the current view
 - fatfs integration to access sd card on MCUs
 - any theme possible
