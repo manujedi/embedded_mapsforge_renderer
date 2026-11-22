@@ -1,4 +1,5 @@
-# embedded mapsforge renderer (Raspberry pico, ESP32,...)
+# embedded mapsforge renderer (Raspberry pico, ESP32,...).
+## This does NOT use per-rendered images like all other embedded map solutions
 
 Last year I tried to render mapsforge maps on embedded devices like the [Waveshare display with a raspberry pico](https://docs.waveshare.com/RP2350-Touch-AMOLED-1.75) with the goal to create a bicycle computer because i wasn't satisfied with the BSC300. Sadly, I lost interest and I don't have the time anymore to finish the project. 
 
