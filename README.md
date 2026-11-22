@@ -1,4 +1,4 @@
-# embedded mapsforge renderer
+# embedded mapsforge renderer (Raspberry pico, ESP32,...)
 
 Last year I tried to render mapsforge maps on embedded devices like the [Waveshare display with a raspberry pico](https://docs.waveshare.com/RP2350-Touch-AMOLED-1.75) with the goal to create a bicycle computer because i wasn't satisfied with the BSC300. Sadly, I lost interest and I don't have the time anymore to finish the project. 
 
@@ -15,11 +15,11 @@ But I succeeded in creating a mapsforge renderer. With the limited amount of ram
 - POI parsed (could be searched)
 - Lvgl as graphics library. Highly portable
 - 60fps if internal ram is used for display framebuffer
+- cache rendered tiles (disabled in video to show render time)
 
 # TODO:
 - GUI for other stuff (speed, position, settings...)
 - GPS logging
-- Caching of rendered tiles (zoom/x/y folder structure and saving the frame buffer) on sd card
 - ...
 
 No AI was used in this project but feel free to continue working on this with AI. Maybe I will continue in winter with the project and just vibe code the rest of it.
