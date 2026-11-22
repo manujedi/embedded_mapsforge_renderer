@@ -33,11 +33,14 @@ include(FreeRTOS_Kernel_import.cmake)
 set(LV_CONF_PATH
         ${CMAKE_CURRENT_SOURCE_DIR}/lv_conf.h
         CACHE STRING "" FORCE)
+set(CMAKE_SKIP_INSTALL_RULES ON)
 include(lvgl/CMakeLists.txt)
+set(CMAKE_SKIP_INSTALL_RULES OFF)
+
 
 # add freertos to lvgl
 target_link_libraries(lvgl PRIVATE
-        FreeRTOS-Kernel-Heap4
+        "$<BUILD_INTERFACE:FreeRTOS-Kernel-Heap4>"
 )
 
 include_directories(./)

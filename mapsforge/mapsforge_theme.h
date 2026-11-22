@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#include "src/misc/lv_color.h"
+#include <include/lvgl/lvgl.h>
 
 typedef struct theme theme;
 

@@ -14,14 +14,7 @@
 #include <mapsforge/mapsforge.h>
 #include <mapsforge/utils.h>
 #include <pico/time.h>
-#include <src/display/lv_display.h>
-#include <src/indev/lv_indev_gesture.h>
-#include <src/lv_init.h>
-#include <src/misc/lv_color.h>
-#include <src/misc/lv_palette.h>
-#include <src/misc/lv_timer.h>
-#include <src/misc/lv_types.h>
-#include <src/tick/lv_tick.h>
+#include <include/lvgl/lvgl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

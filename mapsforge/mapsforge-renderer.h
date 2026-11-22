@@ -1,8 +1,7 @@
 #pragma once
 #include "ff.h"
 #include "mapsforge/mapsforge.h"
-#include "src/misc/lv_types.h"
-
+#include  <include/lvgl/lvgl.h>
 
 int renderer_init_map(mapsforge_header *header, const char *path);
 

@@ -23,8 +23,7 @@
 #include "portable.h"
 #include "semphr.h"
 #include "hardware/platform_defs.h"
-#include "src/draw/lv_draw_vector.h"
-#include "src/widgets/canvas/lv_canvas.h"
+#include <include/lvgl/lvgl.h>
 
 
 extern SemaphoreHandle_t lvgl_lock;

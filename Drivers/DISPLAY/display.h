@@ -2,7 +2,7 @@
 #define CYCLINGPC_DISPLAY_H
 
 #include "hardware/gpio.h"
-#include <src/misc/lv_types.h>
+#include <include/lvgl/lvgl.h>
 
 void display_init(void);
 void display_prepeare_lvgl(lv_display_t *display);
