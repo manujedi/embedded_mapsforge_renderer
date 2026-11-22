@@ -67,6 +67,7 @@ add_executable(cyclingPC
         mapsforge/mapsforge-renderer.c
         mapsforge/mapsforge_theme.c
         mapsforge/utils.c
+        mapsforge/tile_cache.c
         Drivers/GPS/LC76G.c
         Drivers/GPS/LC76G.h
 )

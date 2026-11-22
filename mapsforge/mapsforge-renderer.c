@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include "mapsforge/mapsforge_theme.h"
+#include "../Drivers/FatFs/fatfs_lock.h"
 #include "mapsforge/utils.h"
 #include "mem.h"
 #include "FreeRTOS.h"
@@ -27,14 +28,15 @@
 
 
 extern SemaphoreHandle_t lvgl_lock;
+extern SemaphoreHandle_t fatfs_lock;
 
 int renderer_init_map(mapsforge_header *header, const char *path) {
     uint8_t *buffer = (uint8_t *) FILE_BUFFER;
 
-    f_open(&header->map_fp, path, FA_READ);
+    LOCKED_FCALL(f_open(&header->map_fp, path, FA_READ));
 
     unsigned int read;
-    f_read(&header->map_fp, buffer, 24, &read);
+    LOCKED_FCALL(f_read(&header->map_fp, buffer, 24, &read));
 
     if (memcmp("mapsforge binary OSM", buffer, 20) != 0) {
         printf("not a mapsforge file\n");
@@ -50,8 +52,8 @@ int renderer_init_map(mapsforge_header *header, const char *path) {
 
     uint8_t *hp = (uint8_t *) FILE_BUFFER;
 
-    f_lseek(&header->map_fp, 24);
-    f_read(&header->map_fp, (uint8_t *) FILE_BUFFER, header_size + 512, &read);
+    LOCKED_FCALL(f_lseek(&header->map_fp, 24));
+    LOCKED_FCALL(f_read(&header->map_fp, (uint8_t *) FILE_BUFFER, header_size + 512, &read));
 
     header->header_size = header_size;
     header->file_version = readBigEndian32U(hp);

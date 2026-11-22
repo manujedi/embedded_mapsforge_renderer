@@ -32,11 +32,18 @@ struct renderer_queue_item {
 
 typedef void (*render_done_cb_t)(void*);
 
+// Tile cache configuration
+typedef struct {
+    char base_path[64];       // e.g. "/caching"
+    int enabled;              // 0=disabled, 1=enabled
+} renderer_tile_cache_config_t;
+
 struct renderer_queue_config {
     mapsforge_header *header;
     SemaphoreHandle_t queue_lock;
     render_done_cb_t render_done_cb;
     renderer_queue_item items[5 * 5];
+    renderer_tile_cache_config_t cache;
 };
 
 void renderer_queue_init(mapsforge_header *header, renderer_queue_config *config, render_done_cb_t cb);

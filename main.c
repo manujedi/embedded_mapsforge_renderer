@@ -130,7 +130,7 @@ void render_tile_task(void *pvParameters) {
     // uint64_t took_time = time_us_64() - time_start;
     // printf("%" PRIu64 "s", took_time/1000000);
     // printf(" %" PRIu64 "ms\n", (took_time/1000)%1000);
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
 
@@ -267,8 +267,6 @@ int main(void) {
   /* Configure the hardware ready to run the demo. */
   const char *rtos_name;
   rtos_name = "FreeRTOS SMP";
-
-  printf("Starting %s on both cores:\n", rtos_name);
 
   xTaskCreate(main_task, "MainThread", configMINIMAL_STACK_SIZE, NULL, 15, &maintask);
 

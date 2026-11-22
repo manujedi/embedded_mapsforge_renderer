@@ -8,14 +8,20 @@
 #include "mapsforge-renderer-queue.h"
 
 #include <pthread.h>
+#include <string.h>
 
 #include "mapsforge-renderer.h"
+#include "tile_cache.h"
 
 void renderer_queue_init(mapsforge_header *header,
                          renderer_queue_config *config, render_done_cb_t cb) {
   config->header = header;
   config->queue_lock = xSemaphoreCreateMutex();
   config->render_done_cb = cb;
+  // Cache enabled by default, root: /caching
+  config->cache.enabled = 1;
+  strncpy(config->cache.base_path, "/caching", sizeof(config->cache.base_path) - 1);
+  config->cache.base_path[sizeof(config->cache.base_path) - 1] = '\0';
 
   for (int i = 0; i < sizeof(config->items) / sizeof(config->items[0]); ++i) {
     config->items[i].status = DONE;
@@ -148,7 +154,22 @@ int render_queue_render_item(renderer_queue_config *config) {
     return 0;
   }
 
-  renderer_render_tile(config->header, zoom, tile_x, tile_y, buff);
+  // Check cache before rendering
+  int cache_hit = 0;
+  if (config->cache.enabled) {
+    cache_hit = tile_cache_try_load(config->cache.base_path, zoom, tile_x, tile_y, buff);
+  }
+
+  if (!cache_hit) {
+    // Cache miss: render the tile
+    renderer_render_tile(config->header, zoom, tile_x, tile_y, buff);
+
+    // Save to cache (best-effort, silently fails if disk is full)
+    if (config->cache.enabled) {
+      tile_cache_save(config->cache.base_path, zoom, tile_x, tile_y, buff);
+    }
+  }
+
   config->render_done_cb(buff);
 
   xSemaphoreTake(config->queue_lock, portMAX_DELAY);
